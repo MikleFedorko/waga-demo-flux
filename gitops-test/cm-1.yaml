@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gitops-test-1
+  namespace: default
+data:
+  message: "version 1 from git"
