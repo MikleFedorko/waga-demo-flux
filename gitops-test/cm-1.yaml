@@ -4,4 +4,4 @@ metadata:
   name: gitops-test-1
   namespace: default
 data:
-  message: "version 1 from git"
+  message: "version 2 from git"
