@@ -100,59 +100,6 @@ spec:
         tag: 11-debian-11-r112
 
 ---
-# Source: waga/templates/app/pulse/helmrelease-mongodb.yaml
-apiVersion: helm.toolkit.fluxcd.io/v2
-kind: HelmRelease
-metadata:
-  name: pulse-mongodb
-  namespace: develop
-  labels:
-    app.kubernetes.io/name: waga
-    helm.sh/chart: waga-0.0.1
-    app.kubernetes.io/instance: app
-    app.kubernetes.io/managed-by: Helm
-spec:
-  interval: 1m
-  releaseName: pulse-mongodb
-  chart:
-    spec:
-      chart: mongodb
-      version: 12.1.16
-      sourceRef:
-        kind: HelmRepository
-        name: bitnami
-        namespace: develop
-  values:
-    auth:
-      enabled: false
-    extraFlags:
-    - --wiredTigerCacheSizeGB=0.25
-    - --profile=1
-    - --slowms=1000
-    image:
-      registry: docker.io
-      repository: bitnamilegacy/mongodb
-      tag: 4.4.15
-    persistence:
-      size: 5Gi
-      storageClass: local-path
-    podAnnotations:
-      fake: fake_annotation_to_reconcile_chart
-    resources:
-      limits:
-        memory: 1Gi
-      requests:
-        cpu: 250m
-        memory: 512Mi
-    useStatefulSet: true
-    volumePermissions:
-      enabled: true
-      image:
-        registry: docker.io
-        repository: bitnamilegacy/os-shell
-        tag: 11-debian-11-r112
-
----
 # Source: waga/templates/app/rabbitmq/helmrelease.yaml
 apiVersion: helm.toolkit.fluxcd.io/v2
 kind: HelmRelease
