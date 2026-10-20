@@ -212,5 +212,5 @@ metadata:
   name: bitnami
   namespace: develop
 spec:
-  interval: 15m
+  interval: 10m
   url:  https://charts.bitnami.com/bitnami
