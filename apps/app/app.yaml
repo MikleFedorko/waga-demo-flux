@@ -1,0 +1,216 @@
+---
+# Source: waga/templates/app/minio/pv.yaml
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: minio
+spec:
+  storageClassName: "local-path"
+  capacity:
+    storage: 30Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    type: "DirectoryOrCreate"
+    path: /mnt/itfLocalProvisionerData/minio
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: kubernetes.io/hostname
+          operator: In
+          values:
+          - waga-demo
+
+---
+# Source: waga/templates/app/minio/pv.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: minio
+  namespace: develop
+  labels:
+    app.kubernetes.io/name: waga
+    helm.sh/chart: waga-0.0.1
+    app.kubernetes.io/instance: app
+    app.kubernetes.io/managed-by: Helm
+spec:
+  accessModes:
+    - ReadWriteOnce
+  volumeName: "minio"
+  resources:
+    requests:
+      storage: 30Gi
+  storageClassName: "local-path"
+  volumeMode: Filesystem
+
+---
+# Source: waga/templates/app/minio/helmrelease.yaml
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: minio
+  namespace: develop
+  labels:
+    app.kubernetes.io/name: waga
+    helm.sh/chart: waga-0.0.1
+    app.kubernetes.io/instance: app
+    app.kubernetes.io/managed-by: Helm
+spec:
+  interval: 1m
+  releaseName: minio
+  chart:
+    spec:
+      chart: minio
+      version: 11.8.1
+      sourceRef:
+        kind: HelmRepository
+        name: bitnami
+        namespace: develop
+  values:
+    auth:
+      rootPassword: demo-minio-pass-123
+      rootUser: demoadmin
+    image:
+      registry: docker.io
+      repository: bitnamilegacy/minio
+      tag: 2022.8.11-debian-11-r0
+    ingress:
+      enabled: false
+    itfpv:
+      nodeName: waga-demo
+      pathPrefix: /mnt/itfLocalProvisionerData/minio
+    metrics:
+      serviceMonitor:
+        enabled: false
+    mode: standalone
+    persistence:
+      accessMode: ReadWriteOnce
+      enabled: true
+      existingClaim: minio
+      size: 30Gi
+      storageClass: local-path
+    podAnnotations:
+      dummyAnnotation: somevalue
+    volumePermissions:
+      enabled: true
+      image:
+        registry: docker.io
+        repository: bitnamilegacy/os-shell
+        tag: 11-debian-11-r112
+
+---
+# Source: waga/templates/app/pulse/helmrelease-mongodb.yaml
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: pulse-mongodb
+  namespace: develop
+  labels:
+    app.kubernetes.io/name: waga
+    helm.sh/chart: waga-0.0.1
+    app.kubernetes.io/instance: app
+    app.kubernetes.io/managed-by: Helm
+spec:
+  interval: 1m
+  releaseName: pulse-mongodb
+  chart:
+    spec:
+      chart: mongodb
+      version: 12.1.16
+      sourceRef:
+        kind: HelmRepository
+        name: bitnami
+        namespace: develop
+  values:
+    auth:
+      enabled: false
+    extraFlags:
+    - --wiredTigerCacheSizeGB=0.25
+    - --profile=1
+    - --slowms=1000
+    image:
+      registry: docker.io
+      repository: bitnamilegacy/mongodb
+      tag: 4.4.15
+    persistence:
+      size: 5Gi
+      storageClass: local-path
+    podAnnotations:
+      fake: fake_annotation_to_reconcile_chart
+    resources:
+      limits:
+        memory: 1Gi
+      requests:
+        cpu: 250m
+        memory: 512Mi
+    useStatefulSet: true
+    volumePermissions:
+      enabled: true
+      image:
+        registry: docker.io
+        repository: bitnamilegacy/os-shell
+        tag: 11-debian-11-r112
+
+---
+# Source: waga/templates/app/rabbitmq/helmrelease.yaml
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: rabbitmq
+  namespace: develop
+  labels:
+    app.kubernetes.io/name: waga
+    helm.sh/chart: waga-0.0.1
+    app.kubernetes.io/instance: app
+    app.kubernetes.io/managed-by: Helm
+spec:
+  interval: 1m
+  releaseName: rabbitmq
+  chart:
+    spec:
+      chart: rabbitmq
+      version: 10.1.7
+      sourceRef:
+        kind: HelmRepository
+        name: bitnami
+        namespace: develop
+  values:
+    auth:
+      erlangCookie: demo-erlang-cookie-0123456789
+      password: demo-rabbit-pass-123
+      username: demo
+    clustering:
+      addressType: hostname
+      enabled: false
+      forceBoot: false
+      rebalance: false
+    communityPlugins: https://github.com/rabbitmq/rabbitmq-delayed-message-exchange/releases/download/3.10.2/rabbitmq_delayed_message_exchange-3.10.2.ez
+    extraPlugins: rabbitmq_auth_backend_ldap rabbitmq_mqtt rabbitmq_delayed_message_exchange
+    fullnameOverride: rabbitmq
+    image:
+      registry: docker.io
+      repository: bitnamilegacy/rabbitmq
+      tag: 3.10.5-debian-11-r5
+    persistence:
+      size: 3Gi
+      storageClass: local-path
+    plugins: rabbitmq_management rabbitmq_peer_discovery_k8s
+    replicaCount: 1
+    volumePermissions:
+      enabled: true
+      image:
+        registry: docker.io
+        repository: bitnamilegacy/os-shell
+        tag: 11-debian-11-r112
+
+---
+# Source: waga/templates/helmrepo/bitnami-helmrepo.yaml
+apiVersion: source.toolkit.fluxcd.io/v1
+kind: HelmRepository
+metadata:
+  name: bitnami
+  namespace: develop
+spec:
+  interval: 10m
+  url:  https://charts.bitnami.com/bitnami
