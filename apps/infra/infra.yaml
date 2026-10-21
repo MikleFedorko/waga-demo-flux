@@ -6310,7 +6310,7 @@ data:
     datasources:
     - name: Loki
       type: loki
-      url: http://loki:3100
+      url: http://loki-v3:3100
       access: proxy
       isDefault: false
       jsonData:
@@ -6609,7 +6609,7 @@ spec:
         namespace: infra
   values:
     config:
-      lokiAddress: http://loki:3100/loki/api/v1/push
+      lokiAddress: http://loki-v3:3100/loki/api/v1/push
     helmReleaseNamespace: monitoring
     serviceMonitor:
       enabled: false
