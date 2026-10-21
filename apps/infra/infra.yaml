@@ -6431,10 +6431,15 @@ metadata:
 spec:
   interval: 1m
   releaseName: kube-prometheus-stack
+  timeout: 15m
+  install:
+    crds: CreateReplace
+  upgrade:
+    crds: CreateReplace
   chart:
     spec:
       chart: kube-prometheus-stack
-      version: 48.2.3
+      version: 92.11.0
       sourceRef:
         kind: HelmRepository
         name: prometheus
@@ -6480,7 +6485,6 @@ spec:
         targetPort: 10257
       serviceMonitor:
         https: true
-        insecureSkipVerify: true
     kubeEtcd:
       service:
         port: 2381
@@ -6491,7 +6495,6 @@ spec:
         targetPort: 10259
       serviceMonitor:
         https: true
-        insecureSkipVerify: true
     prometheus:
       ingress:
         enabled: false
