@@ -6535,56 +6535,6 @@ spec:
               volumeName: kube-prometheus-stack-prometheus
 
 ---
-# Source: infra/templates/infra/loki/helmrelease.yaml
-apiVersion: helm.toolkit.fluxcd.io/v2
-kind: HelmRelease
-metadata:
-  name: loki
-  namespace: monitoring
-  labels:
-    app.kubernetes.io/name: infra
-    helm.sh/chart: infra-0.0.2
-    app.kubernetes.io/instance: infra
-    app.kubernetes.io/managed-by: Helm
-spec:
-  interval: 1m
-  releaseName: loki
-  chart:
-    spec:
-      chart: loki
-      version: 2.16.0
-      sourceRef:
-        kind: HelmRepository
-        name: grafana
-        namespace: infra
-  values:
-    config:
-      chunk_store_config:
-        max_look_back_period: 168h
-      ingester:
-        chunk_idle_period: 15m
-      limits_config:
-        max_entries_limit_per_query: 20000
-      table_manager:
-        retention_deletes_enabled: true
-        retention_period: 168h
-    helmReleaseNamespace: monitoring
-    itfpv:
-      nodeName: waga-demo
-      pathPrefix: /mnt/itfLocalProvisionerData/loki
-    persistence:
-      accessModes:
-      - ReadWriteOnce
-      enabled: true
-      size: 5Gi
-      storageClassName: local-path
-      volumeName: loki
-    rbac:
-      pspEnabled: false
-    serviceMonitor:
-      enabled: true
-
----
 # Source: infra/templates/helmrepo/grafana-helmrepo.yaml
 apiVersion: source.toolkit.fluxcd.io/v1
 kind: HelmRepository
