@@ -1,0 +1,178 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: alloy-logs
+rules:
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: alloy-logs
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: alloy-logs
+subjects:
+  - kind: ServiceAccount
+    name: alloy
+    namespace: monitoring
+---
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: alloy
+  namespace: monitoring
+spec:
+  interval: 1m
+  releaseName: alloy
+  timeout: 10m
+  chart:
+    spec:
+      chart: alloy
+      version: 1.14.2
+      sourceRef:
+        kind: HelmRepository
+        name: grafana
+        namespace: infra
+  values:
+    # grafana/alloy 1.14.2 (Alloy v1.21.1): log collector that replaces Promtail (demo)
+    crds:
+      create: false
+    alloy:
+      storagePath: /var/lib/alloy
+      mounts:
+        varlog: true
+        extra:
+          - name: alloy-data
+            mountPath: /var/lib/alloy
+      extraEnv:
+        - name: NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+      securityContext:
+        runAsUser: 0
+        runAsGroup: 0
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+            - ALL
+      resources:
+        requests:
+          cpu: 50m
+          memory: 128Mi
+        limits:
+          memory: 512Mi
+      configMap:
+        content: |
+          discovery.kubernetes "pods" {
+            role = "pod"
+            selectors {
+              role  = "pod"
+              field = "spec.nodeName=" + sys.env("NODE_NAME")
+            }
+          }
+
+          discovery.relabel "pods" {
+            targets = discovery.kubernetes.pods.targets
+
+            rule {
+              source_labels = ["__meta_kubernetes_pod_controller_name"]
+              regex         = "([0-9a-z-.]+?)(-[0-9a-f]{8,10})?"
+              action        = "replace"
+              target_label  = "__tmp_controller_name"
+            }
+            rule {
+              source_labels = ["__meta_kubernetes_pod_label_app_kubernetes_io_name", "__meta_kubernetes_pod_label_app", "__tmp_controller_name", "__meta_kubernetes_pod_name"]
+              regex         = "^;*([^;]+)(;.*)?$"
+              action        = "replace"
+              target_label  = "app"
+            }
+            rule {
+              source_labels = ["__meta_kubernetes_pod_label_app_kubernetes_io_component", "__meta_kubernetes_pod_label_component"]
+              regex         = "^;*([^;]+)(;.*)?$"
+              action        = "replace"
+              target_label  = "component"
+            }
+            rule {
+              source_labels = ["__meta_kubernetes_pod_node_name"]
+              action        = "replace"
+              target_label  = "node_name"
+            }
+            rule {
+              source_labels = ["__meta_kubernetes_namespace"]
+              action        = "replace"
+              target_label  = "namespace"
+            }
+            rule {
+              source_labels = ["namespace", "app"]
+              separator     = "/"
+              replacement   = "$1"
+              action        = "replace"
+              target_label  = "job"
+            }
+            rule {
+              source_labels = ["__meta_kubernetes_pod_name"]
+              action        = "replace"
+              target_label  = "pod"
+            }
+            rule {
+              source_labels = ["__meta_kubernetes_pod_container_name"]
+              action        = "replace"
+              target_label  = "container"
+            }
+            rule {
+              source_labels = ["__meta_kubernetes_pod_uid", "__meta_kubernetes_pod_container_name"]
+              separator     = "/"
+              replacement   = "/var/log/pods/*$1/*.log"
+              action        = "replace"
+              target_label  = "__path__"
+            }
+            rule {
+              source_labels = ["__meta_kubernetes_pod_annotationpresent_kubernetes_io_config_hash", "__meta_kubernetes_pod_annotation_kubernetes_io_config_hash", "__meta_kubernetes_pod_container_name"]
+              separator     = "/"
+              regex         = "true/(.*)"
+              replacement   = "/var/log/pods/*$1/*.log"
+              action        = "replace"
+              target_label  = "__path__"
+            }
+          }
+
+          local.file_match "pods" {
+            path_targets = discovery.relabel.pods.output
+          }
+
+          loki.source.file "pods" {
+            targets       = local.file_match.pods.targets
+            tail_from_end = true
+            forward_to    = [loki.process.pods.receiver]
+          }
+
+          loki.process "pods" {
+            stage.cri {}
+            forward_to = [loki.write.loki_v3.receiver]
+          }
+
+          loki.write "loki_v3" {
+            endpoint {
+              url = "http://loki-v3:3100/loki/api/v1/push"
+            }
+            external_labels = {
+              collector = "alloy",
+            }
+          }
+    controller:
+      type: daemonset
+      volumes:
+        extra:
+          - name: alloy-data
+            hostPath:
+              path: /var/lib/alloy
+              type: DirectoryOrCreate
+    serviceMonitor:
+      enabled: true
+    rbac:
+      create: false
