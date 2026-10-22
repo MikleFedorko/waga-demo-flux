@@ -3,6 +3,8 @@ kind: Service
 metadata:
   name: rabbitmq
   namespace: develop
+  labels:
+    app.kubernetes.io/name: rabbitmq
 spec:
   type: ClusterIP
   ports:
@@ -13,6 +15,10 @@ spec:
     - name: http-stats
       port: 15672
       targetPort: 15672
+      protocol: TCP
+    - name: metrics
+      port: 15692
+      targetPort: 15692
       protocol: TCP
 ---
 apiVersion: discovery.k8s.io/v1
@@ -29,6 +35,9 @@ ports:
     protocol: TCP
   - name: http-stats
     port: 15672
+    protocol: TCP
+  - name: metrics
+    port: 15692
     protocol: TCP
 endpoints:
   - addresses:

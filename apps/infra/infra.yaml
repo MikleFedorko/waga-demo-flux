@@ -6518,6 +6518,7 @@ spec:
             operator: DoesNotExist
         ruleSelectorNilUsesHelmValues: false
         scrapeInterval: 30s
+        serviceDiscoveryRole: EndpointSlice
         serviceMonitorNamespaceSelector:
           matchExpressions:
           - key: inexisting-label2211
