@@ -160,9 +160,6 @@ spec:
             endpoint {
               url = "http://loki-v3:3100/loki/api/v1/push"
             }
-            external_labels = {
-              collector = "alloy",
-            }
           }
     controller:
       type: daemonset
