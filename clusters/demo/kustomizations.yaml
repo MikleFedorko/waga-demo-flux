@@ -8,6 +8,10 @@ spec:
   interval: 10m
   path: ./apps/app
   prune: false
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age
   sourceRef:
     kind: GitRepository
     name: flux-system
@@ -21,6 +25,10 @@ spec:
   interval: 10m
   path: ./apps/infra
   prune: false
+  decryption:
+    provider: sops
+    secretRef:
+      name: sops-age
   sourceRef:
     kind: GitRepository
     name: flux-system
