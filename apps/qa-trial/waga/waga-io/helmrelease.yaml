@@ -23,7 +23,7 @@ spec:
         type: Recreate
       image:
         repository: ghcr.io/stefanprodan/podinfo
-        tag: "6.16.0" # {"$imagepolicy": "flux-system:waga-io-qa:tag"}
+        tag: "6.17.0" # {"$imagepolicy": "flux-system:waga-io-qa:tag"}
         pullPolicy: IfNotPresent
       command:
         - ./podinfo
