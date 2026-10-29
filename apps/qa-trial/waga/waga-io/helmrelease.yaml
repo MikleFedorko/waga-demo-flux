@@ -1,0 +1,121 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: waga-io
+  namespace: develop
+spec:
+  interval: 10m
+  timeout: 10m
+  releaseName: waga-io
+  chart:
+    spec:
+      chart: application
+      version: "9.3.2"
+      sourceRef:
+        kind: HelmRepository
+        name: stakater
+        namespace: infra
+  values:
+    applicationName: waga-io
+    deployment:
+      replicas: 1
+      strategy:
+        type: Recreate
+      image:
+        repository: ghcr.io/stefanprodan/podinfo
+        tag: "6.16.0" # {"$imagepolicy": "flux-system:waga-io-qa:tag"}
+        pullPolicy: IfNotPresent
+      command:
+        - ./podinfo
+      args:
+        - --port=9900
+      imagePullSecrets:
+        - name: gitlab-registry
+      ports:
+        - name: http
+          containerPort: 9900
+          protocol: TCP
+      env:
+        WIM_MEDIA_WORKER:
+          value: "false"
+        API_URL:
+          value: "https://waga-api.demo.local"
+        PG_URI:
+          value: "pg.demo.local:5432/demo"
+        SEA_POLL_ENABLED:
+          value: "true"
+        MINIO_BUCKET:
+          value: "media"
+        MINIO_URL:
+          value: "http://minio:9000"
+        MQ_HOST:
+          value: "rabbitmq"
+      # PG_USER, PG_PASSWORD, SEA_USER, SEA_PASSWORD, MINIO_ACCESS_KEY, MINIO_SECRET_KEY,
+      # MQ_USER, MQ_PASSWORD come from this Secret (SOPS).
+      envFrom:
+        waga-io-env:
+          type: secret
+          name: waga-io-env
+      livenessProbe:
+        enabled: true
+        initialDelaySeconds: 5
+        periodSeconds: 2
+        timeoutSeconds: 2
+        failureThreshold: 3
+        successThreshold: 1
+        tcpSocket:
+          port: 9900
+      readinessProbe:
+        enabled: true
+        initialDelaySeconds: 5
+        periodSeconds: 2
+        timeoutSeconds: 2
+        failureThreshold: 3
+        successThreshold: 2
+        tcpSocket:
+          port: 9900
+      # Parity with the old charts: no container securityContext was set.
+      # TODO(hardening): try runAsNonRoot/readOnlyRootFilesystem=true on the demo first.
+      containerSecurityContext:
+        runAsNonRoot: false
+        readOnlyRootFilesystem: false
+    service:
+      enabled: true
+      # TODO(Q3): NodePort is kept for parity (live nodePort 30947). If nothing uses it
+      # from outside the cluster, switch to ClusterIP and drop nodePort.
+      type: NodePort
+      ports:
+        - name: http
+          port: 9900
+          targetPort: http
+          protocol: TCP
+          nodePort: 30947
+    ingress:
+      enabled: true
+      annotations:
+        cert-manager.io/cluster-issuer: letsencrypt-production
+        kubernetes.io/ingress.class: nginx
+        kubernetes.io/tls-acme: "true"
+        nginx.ingress.kubernetes.io/configuration-snippet: |
+          add_header X-Frame-Options "SAMEORIGIN";
+          add_header X-Content-Type-Options nosniff;
+          add_header X-XSS-Protection 1;
+          add_header X-Permitted-Cross-Domain-Policies none;
+          proxy_hide_header X-Powered-By;
+          server_tokens off;
+          more_clear_headers Server;
+        nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+        nginx.ingress.kubernetes.io/limit-rpm: "1200"
+        nginx.ingress.kubernetes.io/proxy-body-size: 200M
+        nginx.ingress.kubernetes.io/proxy-buffer-size: 64k
+        nginx.ingress.kubernetes.io/proxy-buffers: 8 64k
+      hosts:
+        - host: waga-io.demo.local
+          paths:
+            - path: /
+              pathType: ImplementationSpecific
+              servicePort: http
+      tls:
+        - secretName: waga-io.demo.local-tls
+          hosts:
+            - waga-io.demo.local

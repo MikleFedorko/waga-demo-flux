@@ -1,0 +1,43 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: pulse-adapter
+  namespace: develop
+spec:
+  interval: 10m
+  timeout: 10m
+  releaseName: pulse-adapter
+  chart:
+    spec:
+      chart: application
+      version: "9.3.2"
+      sourceRef:
+        kind: HelmRepository
+        name: stakater
+        namespace: infra
+  values:
+    applicationName: pulse-adapter
+    # Was a sidecar container in the pulse-backend pod.
+    # TODO(Q8): same localhost question as platforms-adapter.
+    deployment:
+      replicas: 1
+      image:
+        repository: ghcr.io/stefanprodan/podinfo
+        tag: "6.16.0"
+        pullPolicy: IfNotPresent
+      imagePullSecrets:
+        - name: gitlab-registry
+      # Both values were in the Secret pulse-pulse-adapter, but they are not secret
+      # (host and database name are visible in the old HelmRelease values), so plain env.
+      env:
+        MONGO_HOST:
+          value: "pulse-mongodb"
+        MONGO_DB:
+          value: "pulse"
+      # Parity with the old charts: no container securityContext was set.
+      # TODO(hardening): try runAsNonRoot/readOnlyRootFilesystem=true on the demo first.
+      containerSecurityContext:
+        runAsNonRoot: false
+        readOnlyRootFilesystem: false
+    service:
+      enabled: false

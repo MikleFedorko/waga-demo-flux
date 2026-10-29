@@ -1,0 +1,89 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: waga-io-worker
+  namespace: develop
+spec:
+  interval: 10m
+  timeout: 10m
+  releaseName: waga-io-worker
+  chart:
+    spec:
+      chart: application
+      version: "9.3.2"
+      sourceRef:
+        kind: HelmRepository
+        name: stakater
+        namespace: infra
+  values:
+    applicationName: waga-io-worker
+    deployment:
+      replicas: 1
+      strategy:
+        type: Recreate
+      image:
+        repository: ghcr.io/stefanprodan/podinfo
+        tag: "6.16.0" # {"$imagepolicy": "flux-system:waga-io-qa:tag"}
+        pullPolicy: IfNotPresent
+      command:
+        - ./podinfo
+      args:
+        - --port=9900
+      imagePullSecrets:
+        - name: gitlab-registry
+      ports:
+        - name: http-worker
+          containerPort: 9900
+          protocol: TCP
+      env:
+        IO_CID:
+          value: "worker_"
+        PG_URI:
+          value: "pg.demo.local:5432/demo"
+        SEA_POLL_ENABLED:
+          value: "true"
+        MINIO_BUCKET:
+          value: "media"
+        MINIO_URL:
+          value: "http://minio:9000"
+        MQ_HOST:
+          value: "rabbitmq"
+      # PG_USER, PG_PASSWORD, SEA_USER, SEA_PASSWORD, MINIO_ACCESS_KEY, MINIO_SECRET_KEY,
+      # MQ_USER, MQ_PASSWORD come from this Secret (SOPS).
+      envFrom:
+        waga-io-worker-env:
+          type: secret
+          name: waga-io-worker-env
+      livenessProbe:
+        enabled: true
+        initialDelaySeconds: 5
+        periodSeconds: 2
+        timeoutSeconds: 2
+        failureThreshold: 3
+        successThreshold: 1
+        tcpSocket:
+          port: 9900
+      readinessProbe:
+        enabled: true
+        initialDelaySeconds: 5
+        periodSeconds: 2
+        timeoutSeconds: 2
+        failureThreshold: 3
+        successThreshold: 2
+        tcpSocket:
+          port: 9900
+      # Parity with the old charts: no container securityContext was set.
+      # TODO(hardening): try runAsNonRoot/readOnlyRootFilesystem=true on the demo first.
+      containerSecurityContext:
+        runAsNonRoot: false
+        readOnlyRootFilesystem: false
+    service:
+      enabled: true
+      # TODO(Q3): live Service is NodePort 31277; kept for parity, probably unneeded.
+      type: NodePort
+      ports:
+        - name: http-worker
+          port: 9900
+          targetPort: http-worker
+          protocol: TCP
+          nodePort: 31277

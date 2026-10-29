@@ -1,0 +1,97 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: waga-ui
+  namespace: develop
+spec:
+  interval: 10m
+  timeout: 10m
+  releaseName: waga-ui
+  chart:
+    spec:
+      chart: application
+      version: "9.3.2"
+      sourceRef:
+        kind: HelmRepository
+        name: stakater
+        namespace: infra
+  values:
+    applicationName: waga-ui
+    deployment:
+      replicas: 1
+      image:
+        repository: ghcr.io/stefanprodan/podinfo
+        tag: "6.16.0" # {"$imagepolicy": "flux-system:waga-ui-qa:tag"}
+        pullPolicy: IfNotPresent
+      command:
+        - ./podinfo
+      args:
+        - --port=8080
+      imagePullSecrets:
+        - name: gitlab-registry
+      ports:
+        - name: http
+          containerPort: 8080
+          protocol: TCP
+      livenessProbe:
+        enabled: true
+        periodSeconds: 10
+        timeoutSeconds: 1
+        failureThreshold: 3
+        successThreshold: 1
+        httpGet:
+          path: /healthz
+          port: http
+          scheme: HTTP
+      readinessProbe:
+        enabled: true
+        periodSeconds: 10
+        timeoutSeconds: 1
+        failureThreshold: 3
+        successThreshold: 1
+        httpGet:
+          path: /healthz
+          port: http
+          scheme: HTTP
+      # Parity with the old charts: no container securityContext was set.
+      # TODO(hardening): try runAsNonRoot/readOnlyRootFilesystem=true on the demo first.
+      containerSecurityContext:
+        runAsNonRoot: false
+        readOnlyRootFilesystem: false
+    service:
+      enabled: true
+      type: ClusterIP
+      ports:
+        - name: http
+          port: 80
+          targetPort: http
+          protocol: TCP
+    ingress:
+      enabled: true
+      annotations:
+        cert-manager.io/cluster-issuer: letsencrypt-production
+        kubernetes.io/ingress.class: nginx
+        kubernetes.io/tls-acme: "true"
+        nginx.ingress.kubernetes.io/configuration-snippet: |
+          add_header X-Frame-Options "SAMEORIGIN";
+          add_header X-Content-Type-Options nosniff;
+          add_header X-XSS-Protection 1;
+          add_header X-Permitted-Cross-Domain-Policies none;
+          proxy_hide_header X-Powered-By;
+          server_tokens off;
+          more_clear_headers Server;
+        nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+        nginx.ingress.kubernetes.io/limit-rpm: "1200"
+        nginx.ingress.kubernetes.io/proxy-body-size: 200M
+        nginx.ingress.kubernetes.io/proxy-buffer-size: 64k
+        nginx.ingress.kubernetes.io/proxy-buffers: 8 64k
+      hosts:
+        - host: waga-ui.demo.local
+          paths:
+            - path: /
+              pathType: ImplementationSpecific
+              servicePort: http
+      tls:
+        - secretName: waga-ui.demo.local-tls
+          hosts:
+            - waga-ui.demo.local

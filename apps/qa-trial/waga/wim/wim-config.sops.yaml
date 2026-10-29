@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Secret
+metadata:
+    name: wim-config
+    namespace: develop
+type: Opaque
+stringData:
+    application.yaml: ENC[AES256_GCM,data:rGDt+KVHIpkL7tzhxMaTl/jWWgVVXVrStE3JIAX2bRc9KVEPAfWBWnF3Q+k1KaAadhSncqCKys3iEPKsGwDAywcovpQ9VRdbp/i7yr+MYlrGAW9HPRXKO6SgeOpcg2Vq/uqbYNlsr4gdBa1spBWoBrL4OJWYHt/foSPLGt2r8bhV9iUNntvgrT6TvZlYwrNicSVNTxFkZPQ/9VPodJax7EqLaEtWEFMIhIPgA3J3RlL4HEu/kS6Lrgbh9Pr17ei5MwChzqgVdqAqP6JnBX9MEnkw64cuPgwhq1g90PMCW9zkRZykVJOLMLVsfI4irYG+UI+w/MxthYjhCvzOgaf8Gz6ivwdikUxH4QWDb5jpGaYEvt6JMo3N9JnmBFJDgduqFX1l6ICjZycctnzf1gjPLLQOwZQTsgiqnLEQhIxBwUWhO7XIJzhEEITsx3nbF0AtRTYb8ArsbnlMZi5QhvaCllNo0N+0yy/UPXmOY4pJ4kRp0E0T8wfIozYAxcP8xKr2xxdOrpAXZUqvSexlVWecpo+L0O76b67Y8uRQ2BLEpotIsA8+ieJPIVrMTy20ib+W82gJ5y+6ygvLXwSfLCjg/FS1+yDOH5W9KwwKa/imeb/wt1w8hk4jRBFwJzEQBL227pdIvw==,iv:+mMhUxzYzjINmX1wfogcQhCM+mACbcqOxXPG3wZAvcY=,tag:njfpF6ZjlQ0+S+JPV5yANA==,type:str]
+sops:
+    age:
+        - enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBEMTljYitiRiswcWFnbEZW
+            clRuQThMNnlwYmt4b0lIL3l4VDJrcUtKMldRCjdEVDNBdmFJbGhGVUR4UUgxa2pv
+            QVhSb201ZDlnRXFOYkhaNjRDTEtFbjAKLS0tIHdYaEEvanNJRUZOVThRWGMybzNp
+            NithbHRRMWdQUXEvRjMybHRzNG9VWDAKuyHlIiBYdzKg2nJwt0cVhZlgZi7XkmnV
+            L80js/WeLMkpHwMvKzb04VgEa+OzU29bY/UxbwrUdu1Rx5Q1nphahQ==
+            -----END AGE ENCRYPTED FILE-----
+          recipient: age1vfu8tdtknmq58uzd5sahl49rhmmhhlj9x3xgqfqmtcqvqj2eevwq7ptvn6
+    encrypted_regex: ^(data|stringData)$
+    lastmodified: "2026-10-29T20:45:34Z"
+    mac: ENC[AES256_GCM,data:nNjWou3JZjsGICQvm6jgghUTTwa5DGH7jkFhz7HlhCtsepON8AylGwJzOsdSanlRyw1LfTjJ42o6HaKTvOwT7x5rahXsB5wpGG4J01mwgQrjQW6Gs+ecmQ+QyOn5zkvCClnnG7YGiwd4b76xIkj2P+lFAssh896IzMR3aWzsIc0=,iv:oJC1Z+k1pud96KXohTY67T06sdSGIwA/MtFmmALHXvM=,tag:fxzQ2QsTZyXMVrmjWq3w+g==,type:str]
+    version: 3.13.3

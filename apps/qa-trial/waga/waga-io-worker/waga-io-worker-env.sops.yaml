@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: Secret
+metadata:
+    name: waga-io-worker-env
+    namespace: develop
+type: Opaque
+stringData:
+    PG_USER: ENC[AES256_GCM,data:3fq1nc3skg8qWJ+Ou93Ru8o=,iv:vNOaJnx0uUpcZOuyGwW4E9LajUOs9Q6bOR0tQDRSl/U=,tag:mzj++OGlcUxXuTpGjyyl3Q==,type:str]
+    PG_PASSWORD: ENC[AES256_GCM,data:u01CoOPRkIMRB7GLAPj3+2I=,iv:vwC1iVt8K/IiYkJWTwJ7mBaxeR/6aXQCz3WEMQWL+o8=,tag:sdfHfvnhK2Xpth8BGdWHcQ==,type:str]
+    SEA_USER: ENC[AES256_GCM,data:CebbDrj3hC99iIZPE80nx0U=,iv:M7K6OBqi7PiULWHDP4r/MSjMpOjYG3pirYL0Ufj95eA=,tag:ievVbZ3u2gMCFqieA9x2UQ==,type:str]
+    SEA_PASSWORD: ENC[AES256_GCM,data:H8AmOo9U6ptp+PWQexHATiQ=,iv:q1B/s/96+oMZOL9r7xlkvUZeGeesxQAtkww+owTr3u8=,tag:WEsBPvB6nH7toIpXyCLEEQ==,type:str]
+    MINIO_ACCESS_KEY: ENC[AES256_GCM,data:9B6bXUqDGGeTP45pO1PNFEU=,iv:MAUa6MLqY5jZDYQpQMK75FK1Ht9IvLjduXSnSUT+xmg=,tag:PXPLweAwARRuqgkMoOn8uQ==,type:str]
+    MINIO_SECRET_KEY: ENC[AES256_GCM,data:MetwY0HaeLMz3zsQWnGJGxg=,iv:KJZWuiiTi0GeqTT0mcj0uMk2j7p6tizH2YZkFN2Q+Zw=,tag:P1+DbtgDA7Ei/243c3wZbQ==,type:str]
+    MQ_USER: ENC[AES256_GCM,data:cFbc5+rL4jPrsdTp9oHpZmo=,iv:kP6mhxfMbyYFx3p0XiSsOYdJnT0refuPFqQFoItKokI=,tag:jkS1lztepI9xNOrPUjQHcw==,type:str]
+    MQ_PASSWORD: ENC[AES256_GCM,data:yaq0MpeXFlhEkUhuQD8aL90=,iv:mek2xlHTSEGGcraM148HQkCPK95ik7OifUa4KTmkmBk=,tag:gp3fqEOfYCZRzjb+VbrWwQ==,type:str]
+sops:
+    age:
+        - enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBPMjZOZnIwZ3NrY2Z3U3px
+            RXM4ZnVuSWo4eVA5ZVE0WlRiMTg0RURoaHhZClUxLzd2dENCaStOQjlTMHRjTFVD
+            akkvR1cvZWRlcS9IZi9POVRIbHYzWnMKLS0tIENwRXdPb2drVjVYNmFWL2RlWkhr
+            cW5tR3Q5K0ZHREhXRTZYYWp4cmdwUkEKgKTybZ8KkLIIiwS4OxaDiLP1CQdlz56i
+            faf3rnDJmKz5bAOuJyvG/quHbkiPklF2jbxSEa/s8zARlIt3QWLMYQ==
+            -----END AGE ENCRYPTED FILE-----
+          recipient: age1vfu8tdtknmq58uzd5sahl49rhmmhhlj9x3xgqfqmtcqvqj2eevwq7ptvn6
+    encrypted_regex: ^(data|stringData)$
+    lastmodified: "2026-10-29T20:45:34Z"
+    mac: ENC[AES256_GCM,data:RNxpqvqKXkvEI7fnyw1ufMmS+yAdXVy58Bqur4dM9rQrd8k3sbgDw0aQantk3ND875kwsNxUZTQx9eYQY0nJH5K8+YySqkzc1ZcQQMM7DpAANXTjBzsxI+qkKJ3KChnexlrLr1PnrKva+ZK8WMxu5MDDqtZHZyh58Hf+/4NqlWo=,iv:iFmo0ZiJ8CmepFhMH2Ca+URKBE7YOorX7IeZ3MTJYwE=,tag:YmRM/V9SIkzhu0qOn/P5qg==,type:str]
+    version: 3.13.3

@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Secret
+metadata:
+    name: registry
+    namespace: flux-system
+type: kubernetes.io/dockerconfigjson
+stringData:
+    .dockerconfigjson: ENC[AES256_GCM,data:f3wb9oUq/+fMd3iU,iv:vxIIecryfdjyJ9mOgVuHXbfL0y9OhJgiBHkr2iJGEsI=,tag:TtnzuJ2tXX5QpULoZi81wA==,type:str]
+sops:
+    age:
+        - enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBWR1plUGFacU5neXBVTm1C
+            WEgzRmtqdTBtQUVmSkEyclRtcGl1d0xaTzFRCkxiQVJJMHpNeUg1enptcWhpLzhp
+            cDlLc1ZzNnYySVJ0b1JSeDhGejU1cE0KLS0tIEcrejFpQndxb0M4aTViTDF6RzRk
+            cmRvenBPR2Roek5qL2xwSFQySE5IV2sKAMfEnEppkszfMqrgApElA9Q+H4yRKEC0
+            dDE6OzkZr1C7Zb8PohQY8HI4R9R6cObPN4SS+K3cSeDxx0BaNBD2YQ==
+            -----END AGE ENCRYPTED FILE-----
+          recipient: age1vfu8tdtknmq58uzd5sahl49rhmmhhlj9x3xgqfqmtcqvqj2eevwq7ptvn6
+    encrypted_regex: ^(data|stringData)$
+    lastmodified: "2026-10-29T20:45:34Z"
+    mac: ENC[AES256_GCM,data:tUYn29B93Troy2aLmqemmtr0LwAoQviCK7xWjRTykEkVuLNRkHhPR8viJSxHrPXqGhjC+J6/MUe1c1fOM3nC2uvnY4NmN2XKLqMEVkzQ8xgW7CIXElOI2vIFirX/VOAvNH/Rlq6v5RbjZkCjryhPJSYUSy11GI0Inu+OBYDl0jI=,iv:07rljOdR6kkdCEVWVfVdGaRNC2smLTaGpBgi5iWrPCM=,tag:eoow15OC8TbB2bPIlaLT4Q==,type:str]
+    version: 3.13.3

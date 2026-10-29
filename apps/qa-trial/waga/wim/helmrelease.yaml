@@ -1,0 +1,82 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: wim
+  namespace: develop
+spec:
+  interval: 10m
+  timeout: 10m
+  releaseName: wim
+  chart:
+    spec:
+      chart: application
+      version: "9.3.2"
+      sourceRef:
+        kind: HelmRepository
+        name: stakater
+        namespace: infra
+  values:
+    applicationName: wim
+    deployment:
+      replicas: 1
+      image:
+        repository: ghcr.io/stefanprodan/podinfo
+        tag: "6.16.0" # {"$imagepolicy": "flux-system:waga-wim-qa:tag"}
+        pullPolicy: IfNotPresent
+      command:
+        - ./podinfo
+      args:
+        - --port=16000
+      imagePullSecrets:
+        - name: gitlab-registry
+      ports:
+        - name: http
+          containerPort: 16000
+          protocol: TCP
+      env:
+        NODE_ENV:
+          value: "production"
+        NODE_CONFIG:
+          value: "/app/configs/application.yaml"
+      # application.yaml holds the DB password, so it is a SOPS-encrypted Secret (wim-config),
+      # not a ConfigMap as before.
+      volumes:
+        config:
+          secret:
+            secretName: wim-config
+      volumeMounts:
+        config:
+          mountPath: /app/configs/application.yaml
+          subPath: application.yaml
+          readOnly: true
+      # Parity with the old charts: no container securityContext was set.
+      # TODO(hardening): try runAsNonRoot/readOnlyRootFilesystem=true on the demo first.
+      containerSecurityContext:
+        runAsNonRoot: false
+        readOnlyRootFilesystem: false
+      # The old pod had no probes either.
+    service:
+      enabled: true
+      type: ClusterIP
+      ports:
+        - name: http
+          port: 80
+          targetPort: http
+          protocol: TCP
+    ingress:
+      enabled: true
+      annotations:
+        cert-manager.io/cluster-issuer: letsencrypt-production
+        kubernetes.io/ingress.class: nginx
+        nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+        nginx.ingress.kubernetes.io/proxy-body-size: 100m
+      hosts:
+        - host: wim.demo.local
+          paths:
+            - path: /
+              pathType: ImplementationSpecific
+              servicePort: http
+      tls:
+        - secretName: wim.demo.local-tls
+          hosts:
+            - wim.demo.local

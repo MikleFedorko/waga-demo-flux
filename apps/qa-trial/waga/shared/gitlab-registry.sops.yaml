@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Secret
+metadata:
+    name: gitlab-registry
+    namespace: develop
+type: kubernetes.io/dockerconfigjson
+stringData:
+    .dockerconfigjson: ENC[AES256_GCM,data:6QdiTowmGEEzGdVB,iv:AZFSIimr+G762kgMOxgtCAgy4CdGDaIIn/UeVQ6G1B8=,tag:pDENOh0sLMRDnC4ug9cVFQ==,type:str]
+sops:
+    age:
+        - enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSBjYkx6V2V5NzYxbjQ2NVN5
+            dzNpUGJXc1BrSkRzLzMyUktRY2IzUUtuOWlRCnl4cU5CMHA2bDZoMFJENktIZlJU
+            UjRlK204L0Z4VVhzNkwyQnB3dllmNDQKLS0tIHcrSDZpdVh4VUxVNmlPVWx0Uisr
+            L3VhU25Ob3pZMXJtV0xmVllDQXlOMjAK9Z70W34y+r/g2d+xt2+WDPBygCxTWVB3
+            2/yJVx2uCxKELX3nnYWlidlgs6Hrc6NvmK7UwE0xvjkPT9RfxwDF1A==
+            -----END AGE ENCRYPTED FILE-----
+          recipient: age1vfu8tdtknmq58uzd5sahl49rhmmhhlj9x3xgqfqmtcqvqj2eevwq7ptvn6
+    encrypted_regex: ^(data|stringData)$
+    lastmodified: "2026-10-29T20:45:33Z"
+    mac: ENC[AES256_GCM,data:5zSok6Lpe5O6SvbkFTycccRQULQokPlnGsrxhM1EzhFUfm5ERdy0IzDX7rBS4KhzB4GZdr0UcAogErYXStEstJ+CwZOlDX807PMuK/r30VFRzKylKpBccI2TT/VqPbMXpACJ0vYeoByJrhWVerIZk3mo/Ss9uge2D3RrX0fTS1A=,iv:Qhx+MeGREdY7lvtM2MUy33u+vppIiqknM+albpjcg8g=,tag:szhi4AAN/UpmY6nwfWWW6g==,type:str]
+    version: 3.13.3

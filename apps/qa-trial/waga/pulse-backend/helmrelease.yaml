@@ -1,0 +1,105 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: pulse-backend
+  namespace: develop
+spec:
+  interval: 10m
+  timeout: 10m
+  releaseName: pulse-backend
+  chart:
+    spec:
+      chart: application
+      version: "9.3.2"
+      sourceRef:
+        kind: HelmRepository
+        name: stakater
+        namespace: infra
+  values:
+    applicationName: pulse-backend
+    deployment:
+      replicas: 1
+      image:
+        repository: ghcr.io/stefanprodan/podinfo
+        tag: "6.16.0" # {"$imagepolicy": "flux-system:waga-pulse-qa:tag"}
+        pullPolicy: IfNotPresent
+      command:
+        - ./podinfo
+      args:
+        - --port=5000
+        - --port-metrics=5100
+      imagePullSecrets:
+        - name: gitlab-registry
+      ports:
+        - name: server
+          containerPort: 5000
+          protocol: TCP
+        - name: client
+          containerPort: 5100
+          protocol: TCP
+      env:
+        NODE_CONFIG:
+          value: "/opt/config/application.yaml"
+      # application.yaml holds JWT/admin secrets and the waga-io token, so it is a
+      # SOPS-encrypted Secret (pulse-backend-config), not a ConfigMap as before.
+      volumes:
+        config:
+          secret:
+            secretName: pulse-backend-config
+      volumeMounts:
+        config:
+          mountPath: /opt/config/application.yaml
+          subPath: application.yaml
+          readOnly: true
+      startupProbe:
+        enabled: true
+        periodSeconds: 5
+        timeoutSeconds: 1
+        failureThreshold: 120
+        successThreshold: 1
+        httpGet:
+          path: /healthz
+          port: server
+          scheme: HTTP
+      livenessProbe:
+        enabled: true
+        initialDelaySeconds: 5
+        periodSeconds: 3
+        timeoutSeconds: 5
+        failureThreshold: 3
+        successThreshold: 1
+        httpGet:
+          path: /healthz
+          port: server
+          scheme: HTTP
+      readinessProbe:
+        enabled: true
+        initialDelaySeconds: 5
+        periodSeconds: 3
+        timeoutSeconds: 5
+        failureThreshold: 3
+        successThreshold: 1
+        httpGet:
+          path: /healthz
+          port: server
+          scheme: HTTP
+      # Parity with the old charts: no container securityContext was set.
+      # TODO(hardening): try runAsNonRoot/readOnlyRootFilesystem=true on the demo first.
+      containerSecurityContext:
+        runAsNonRoot: false
+        readOnlyRootFilesystem: false
+    # One Service with two ports. The old chart had two Services
+    # (pulse-backend-server:5000 and pulse-backend-client:5100); the nginx config of
+    # pulse-frontend is updated to use pulse-backend:5000 / pulse-backend:5100.
+    service:
+      enabled: true
+      type: ClusterIP
+      ports:
+        - name: server
+          port: 5000
+          targetPort: server
+          protocol: TCP
+        - name: client
+          port: 5100
+          targetPort: client
+          protocol: TCP
