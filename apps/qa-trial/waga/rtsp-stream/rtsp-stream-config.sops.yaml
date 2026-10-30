@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Secret
+metadata:
+    name: rtsp-stream-config
+    namespace: develop
+type: Opaque
+stringData:
+    rtsp-stream.yml: ENC[AES256_GCM,data:eWLZi7L0zN+n6N59aqLHQ+dFOTW8wWTXtPf2YoYsq4E4gqCsp849KmApJbJrzOqzrKrzvbTm4FY9JYIduMEmhLkxnxXoEsaZ2CajI5XDBX55CG3c0n9lh/Gid2+4/aEjFCslkhdPdsvZORWzyLXjxPwlLhxdXLMZ9k+30eoUKH36v7OESUxJefw5jTrp44cQGayw+CgdHfnsAh4tRlj8RZaD08A1VnT101djm0V9pjX/fC5SStIpopOaDrkSZ4O2SerRujhKyoIx7QCdUDYevHhB52x2SWlV2+HxtWzWTmorQTTrbKa7F9G0WqFkNQBzqLY+vFGn8XiL+MKlK804PWCZFisTCSu/i7lm7qLbOu+1QZXaRL1dRkpzCsFFophOj8UxaOetchxJchN0oEvvVuQ31VtIeASyJPVYqYvO/9cFEPAW0XupGkbigNYd5tbJkVQuZFq+AR5zdpLrA9RJPA8ezql8jBgk5Hipt5o09j1utjQ06/jjeGpEiDjE6bssHtPo/NVvL7KV0YqY1lIgUnCW0HQcZZyrMkE3pUmD9n0EmR+L/K31rqNVVLX2LuIPWnJk7cPUUbKlnQETJdtKtLZExuU7CvyLU9oeTYEt0WLaD9XJNYPk/PuNDoQ//kMCHNQRwVNYaspA5rVYSZtBnkd7psSJjikUtTc4bFG+1jlUSiFV0I9hAcj3A9i4dA44DUqWZW0rbBi3/Yee5kGtWs5G0kEoVgjif3JPmyP5wAHIrXFae3eeBj3wRjW1cne0XTCi7DYzGUX7OVna2MJMXCq3h04r6iwRhdM23Y/ALSpDi2UFRFsk2jGVSLBBuyGoq42lGAiz/ez+eKadCp+qAhEQkoPakC5B10IJPZtIzG0/yTyJmcD/YLlyqLVcP8V8PucZW/uVQ09JrknniwjuQZUMDgAe38zo5W5mKPpVzpEfVjl0mMpQw3yQZWpUFOXnh7PV1K957OufNwiukfnBSooF0V4aMc7sj1K7SsAN+tUC/+sp+APuX+idYsnCE0LD6PbUPHJ9yYeGsBa+xVA34wjMYm9n88ifTr7rsjx4eXjfhMKuAWLOSrgoV3AurzoQtdiUePdWw+2904GgCiqzvF0sa5HOQiH/Sgj3rgocFHu85Lwfan4MPWs3HBMx6nS1cvgHe5gphe8BxBGw6/wMNioVsgTBNoBeBdjYTblv5JLrXTSPmJgmOkV407Hw0rzqqyzzTrC1dCpct3oHrIiiHOGC64iSMBvnAUXfa62k4yKJqoC/THKC7IBfkedonI9lmrUuzu/MI8dPqkYkQhyh,iv:x2G59hklR5DseDfIU27zMuthqJwMjyPFsdNYBbfUVUo=,tag:TayPN+H1/Zl1GlHDdiQKEQ==,type:str]
+sops:
+    age:
+        - enc: |
+            -----BEGIN AGE ENCRYPTED FILE-----
+            YWdlLWVuY3J5cHRpb24ub3JnL3YxCi0+IFgyNTUxOSArNTZHZFZsa28xRzBickht
+            QU1pbnRJcGxQb2Ryd0NkRjFHUnBuOUd0c3c4CmZCMWFZblI3Z1ZPOGhSWU9sWW1M
+            VEtkdHI0MnBiUFE5ZUFsN1FlamJKMnMKLS0tIGhBRkVsRTBYMHJWb1RPZWpUbXNn
+            MEVCaVlXZy9RbzA0cGJzTGVsQkdmVE0KTEsicY+BXX/1PWYlsDnMf0lhjh+DGzxK
+            cr/NEMbnAU/39nsjhkdI73SD1zOHSWByaY6HyUKNk1yRnjvej/Xyxw==
+            -----END AGE ENCRYPTED FILE-----
+          recipient: age1vfu8tdtknmq58uzd5sahl49rhmmhhlj9x3xgqfqmtcqvqj2eevwq7ptvn6
+    encrypted_regex: ^(data|stringData)$
+    lastmodified: "2026-10-30T21:05:35Z"
+    mac: ENC[AES256_GCM,data:PTTuc0lITeaEasNRXR2+NwA4+8etCF7WjyCIkpRdTOd/Vj5snWMw6icuBI4XPpjXCp1S9JOsQBEOOAdVRtDJfJxazprGC0oiHVJB9JGqAvuTKpIZbLALQQ5z0M2vvbz5RVamwXxthb9eXd3Qw9VxQ4K2ZeZ8sCSDaz1x7Uha2GA=,iv:cTR09Nw6mq3trWC5r3WS9EhV6SedsaECCdlTN6draIw=,tag:Xx+A3qqUINaHgVSExkmj7g==,type:str]
+    version: 3.13.3

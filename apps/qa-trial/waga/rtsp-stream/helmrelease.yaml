@@ -1,0 +1,88 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: rtsp-stream
+  namespace: develop
+spec:
+  interval: 10m
+  timeout: 10m
+  releaseName: rtsp-stream
+  chart:
+    spec:
+      chart: application
+      version: "9.3.2"
+      sourceRef:
+        kind: HelmRepository
+        name: stakater
+        namespace: infra
+  values:
+    applicationName: rtsp-stream
+    # STUB (mentor answer Q1: "bring it up, image = stub"). Replace the three image lines below,
+    # the container port and the config mount path once the real image is confirmed.
+    # The pod answers HTTP on 8080 only; no RTSP stream is served.
+    deployment:
+      replicas: 1
+      image:
+        repository: ghcr.io/stefanprodan/podinfo
+        tag: "6.16.0"
+        pullPolicy: IfNotPresent
+      # The stub image has no ENTRYPOINT, so the binary and its port are given explicitly.
+      command:
+        - ./podinfo
+      args:
+        - --port=8080
+      imagePullSecrets:
+        - name: gitlab-registry
+      ports:
+        - name: api
+          containerPort: 8080
+          protocol: TCP
+      # The old chart had both probes disabled; kept for parity.
+      livenessProbe:
+        enabled: false
+      readinessProbe:
+        enabled: false
+      # rtsp-stream.yml (12 stream aliases, camera addresses, stop/list secrets) was a ConfigMap
+      # (rtsp-stream-external-config). It contains camera credentials, so it is a SOPS Secret now.
+      # TODO(real image): the mount path is a placeholder; the old chart (wimware, not available here) decided it.
+      volumes:
+        config:
+          secret:
+            secretName: rtsp-stream-config
+      volumeMounts:
+        config:
+          mountPath: /config/rtsp-stream.yml
+          subPath: rtsp-stream.yml
+          readOnly: true
+      # Parity with the old charts: no container securityContext was set.
+      # TODO(hardening): try runAsNonRoot/readOnlyRootFilesystem=true on the demo first.
+      containerSecurityContext:
+        runAsNonRoot: false
+        readOnlyRootFilesystem: false
+    service:
+      enabled: true
+      type: ClusterIP
+      # pulse-backend reaches it over HTTP at host rtsp-stream, port 80 (rtspStreamService in its config).
+      ports:
+        - name: api
+          port: 80
+          targetPort: api
+          protocol: TCP
+    ingress:
+      enabled: true
+      annotations:
+        cert-manager.io/cluster-issuer: letsencrypt-production
+        kubernetes.io/ingress.class: nginx
+        kubernetes.io/tls-acme: "true"
+        # Basic auth is NOT enabled for now (decision 30.10: "basic auth is not needed yet"). The old setup had
+        # auth-type/auth-secret/auth-realm annotations and a Secret rtsp-stream-basic-auth; add both back if it is needed again.
+      hosts:
+        - host: rtsp-stream.demo.local
+          paths:
+            - path: /
+              pathType: ImplementationSpecific
+              servicePort: api
+      tls:
+        - secretName: rtsp-stream.demo.local-tls
+          hosts:
+            - rtsp-stream.demo.local

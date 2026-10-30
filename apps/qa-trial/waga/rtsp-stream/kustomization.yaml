@@ -1,0 +1,5 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - helmrelease.yaml
+  - rtsp-stream-config.sops.yaml        # created from rtsp-stream-config.secret.template.yaml; Flux reports it missing until then

@@ -1,0 +1,31 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: reloader
+  namespace: infra
+spec:
+  interval: 10m
+  timeout: 10m
+  releaseName: reloader
+  chart:
+    spec:
+      chart: reloader
+      # Same OCI registry as the application chart (HelmRepository stakater).
+      # 2.2.19 = chart version at the upstream HEAD of 2026-10-27 (appVersion v1.4.23); confirm on the demo (T3) and pin.
+      version: "2.2.19"
+      sourceRef:
+        kind: HelmRepository
+        name: stakater
+        namespace: infra
+  values:
+    reloader:
+      # "annotations" writes reloader.stakater.com/last-reloaded-from into the pod template instead of adding a dummy env
+      # variable; upstream recommends it for GitOps tools (Flux, ArgoCD).
+      reloadStrategy: annotations
+      # Least privilege: no ClusterRole, only a Role in each listed namespace (plus the release namespace).
+      watchGlobally: false
+      namespaces:
+        - develop
+    # The Stakater application chart adds reloader.stakater.com/auto: "true" to every Deployment
+    # (deployment.reloadOnChange defaults to true), so all 10 releases opt in without any change.
+    # TODO(hardening): set resources for the reloader pod (none by default).
